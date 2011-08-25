@@ -1,0 +1,65 @@
+#!/usr/bin/env ruby
+
+# A few helpful tips about the Rules file:
+#
+# * The string given to #compile and #route are matching patterns for
+#   identifiers--not for paths. Therefore, you can't match on extension.
+#
+# * The order of rules is important: for each item, only the first matching
+#   rule is applied.
+#
+# * Item identifiers start and end with a slash (e.g. "/about/" for the file
+#   "content/about.html"). To select all children, grandchildren, ... of an
+#   item, use the pattern "/about/*/"; "/about/*" will also select the parent,
+#   because "*" matches zero or more characters.
+
+compile '/assets/stylesheets/application/' do
+  # run through sprockets
+  filter :sprockets
+end
+
+compile '/assets/javascripts/application/' do
+  # run through sprockets
+  filter :sprockets
+end
+
+compile '*' do
+  if item.binary?
+    # don't filter binary items
+  else
+    ext = item[:extension].nil? ? nil : item[:extension].split('.').last
+    filter :erb
+    case ext
+    when 'md'
+      filter :kramdown
+    end
+    filter :colorize_syntax,
+           :colorizers => { :ruby => :coderay },
+           :coderay    => { :line_numbers => :list }
+
+    puts item.inspect
+    layout item[:layout] ? item[:layout] : 'default'
+    
+  end
+end
+
+
+route '/assets/stylesheets/application/' do
+  '/assets/application.css'
+end
+
+route '/assets/javascripts/application/' do
+  '/assets/application.js'
+end
+
+route '*' do
+  if item.binary?
+    # Write item with identifier /foo/ to /foo.ext
+    item.identifier.chop + '.' + item[:extension]
+  else
+    # Write item with identifier /foo/ to /foo/index.html
+    item.identifier + 'index.html'
+  end
+end
+
+layout '*', :erb
