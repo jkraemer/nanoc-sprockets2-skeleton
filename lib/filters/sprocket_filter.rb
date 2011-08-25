@@ -10,14 +10,14 @@ module Filters
 
     identifier :sprockets
     type :text
-    
+
     Assets = Sprockets::Environment.new(ROOT) do |env|
       assets =  ['javascripts', 'stylesheets', 'images', 'fonts']
       paths =   ['content/assets/', 'lib/', 'vendor/assets/' ].map{|p| assets.map{|f| "#{p}#{f}" } }.flatten
 
       paths.each{ |path| env.append_path path }
     end unless defined? Assets
-    
+
     def run(content, params = {})
       filename = File.basename(@item[:filename])
       if asset = Assets[filename]

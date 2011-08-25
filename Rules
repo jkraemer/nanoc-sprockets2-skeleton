@@ -37,9 +37,8 @@ compile '*' do
            :colorizers => { :ruby => :coderay },
            :coderay    => { :line_numbers => :list }
 
-    puts item.inspect
+    #puts item.inspect
     layout item[:layout] ? item[:layout] : 'default'
-    
   end
 end
 
